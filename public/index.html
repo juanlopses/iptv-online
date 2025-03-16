@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Player</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        input, button { margin: 10px; padding: 8px; }
+        ul { list-style: none; padding: 0; }
+        li { cursor: pointer; padding: 5px; border: 1px solid #ccc; margin: 5px; }
+        li:hover { background: #ddd; }
+        video { width: 80%; max-width: 800px; margin-top: 10px; }
+    </style>
+    <script>
+        async function cargarLista() {
+            const url = document.getElementById("iptvUrl").value;
+            if (!url) return alert("Ingrese un enlace IPTV");
+
+            try {
+                const respuesta = await fetch(`/api/canales?url=${encodeURIComponent(url)}`);
+                const canales = await respuesta.json();
+
+                const lista = document.getElementById("listaCanales");
+                lista.innerHTML = "";
+                canales.forEach(canal => {
+                    const li = document.createElement("li");
+                    li.textContent = canal.titulo;
+                    li.onclick = () => reproducirCanal(canal.url);
+                    lista.appendChild(li);
+                });
+            } catch (error) {
+                alert("Error al cargar la lista");
+            }
+        }
+
+        function reproducirCanal(url) {
+            const video = document.getElementById("video");
+            video.src = url;
+            video.play();
+        }
+    </script>
+</head>
+<body>
+    <h1>Reproductor IPTV</h1>
+    <input type="text" id="iptvUrl" placeholder="Introduce la URL M3U">
+    <button onclick="cargarLista()">Cargar Lista</button>
+    <ul id="listaCanales"></ul>
+    <video id="video" controls></video>
+</body>
+</html>
