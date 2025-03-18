@@ -12,6 +12,7 @@
         li:hover { background: #ddd; }
         video { width: 80%; max-width: 800px; margin-top: 10px; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         async function cargarLista() {
             const url = document.getElementById("iptvUrl").value;
@@ -36,8 +37,24 @@
 
         function reproducirCanal(url) {
             const video = document.getElementById("video");
-            video.src = url;
-            video.play();
+
+            // Si el navegador soporta HLS de forma nativa, simplemente asignamos la URL
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // En dispositivos Apple (Safari), podemos usar el reproductor nativo HLS
+                video.src = url;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play();
+                });
+            } else {
+                alert('El navegador no es compatible con este tipo de flujo');
+            }
         }
     </script>
 </head>
